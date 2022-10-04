@@ -22,10 +22,10 @@
       {{ selectedRobot.head.title }}
     </div>
     <div class="top-row">
-<!--      <div class="robot-name">
-        {{ selectedRobot.head.title }}
-        <span v-if="selectedRobot.head.onSale" class="sale">Sale!</span>
-      </div>-->
+      <!--      <div class="robot-name">
+              {{ selectedRobot.head.title }}
+              <span v-if="selectedRobot.head.onSale" class="sale">Sale!</span>
+            </div>-->
       <PartSelector
         :parts="availableParts.heads"
         position="top"
@@ -33,21 +33,21 @@
       />
     </div>
     <div class="middle-row">
-        <PartSelector
-          :parts="availableParts.arms"
-          position="left"
-          @partSelected="part => selectedRobot.leftArm=part"
-        />
-        <PartSelector
-          :parts="availableParts.torsos"
-          position="center"
-          @partSelected="part => selectedRobot.torso=part"
-        />
-        <PartSelector
-          :parts="availableParts.arms"
-          position="right"
-          @partSelected="part => selectedRobot.rightArm=part"
-        />
+      <PartSelector
+        :parts="availableParts.arms"
+        position="left"
+        @partSelected="part => selectedRobot.leftArm=part"
+      />
+      <PartSelector
+        :parts="availableParts.torsos"
+        position="center"
+        @partSelected="part => selectedRobot.torso=part"
+      />
+      <PartSelector
+        :parts="availableParts.arms"
+        position="right"
+        @partSelected="part => selectedRobot.rightArm=part"
+      />
     </div>
     <div class="bottom-row">
       <PartSelector
@@ -84,10 +84,23 @@ import CollapsibleSection from '../shared/CollapsibleSection.vue';
 
 export default {
   name: 'RobotBuilder',
-  components: { PartSelector, CollapsibleSection },
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      // eslint-disable-next-line no-restricted-globals
+      const response = confirm('You have not added your robot to your cart, are you sure you want to leave?');
+      next(response);
+    }
+  },
+  components: {
+    PartSelector,
+    CollapsibleSection,
+  },
   data() {
     return {
       availableParts,
+      addedToCart: false,
       cart: [],
       selectedRobot: {
         head: {},
@@ -101,6 +114,7 @@ export default {
   mixins: [createdHookMixin],
   methods: {
     addToCart() {
+      this.addedToCart = true;
       const robot = this.selectedRobot;
       const cost = robot.head.cost
         + robot.leftArm.cost
@@ -280,19 +294,24 @@ td, th {
   height: 210px;
   padding: 5px;
 }
+
 .preview-content {
   border: 1px solid #999;
 }
+
 .preview img {
   width: 50px;
   height: 50px;
 }
+
 .rotate-right {
   transform: rotate(90deg);
 }
+
 .rotate-left {
   transform: rotate(-90deg);
 }
+
 .robot-name {
   color: green;
 }
